@@ -37,18 +37,29 @@ word_index, model = load_resources()
 # Preprocess review
 # ============================================================
 
+MAX_FEATURES = 1000
+MAX_LEN = 500
+
 def preprocess_text(text):
 
     words = text.lower().split()
 
-    encoded_review = [
-        word_index.get(word, 2) + 3
-        for word in words
-    ]
+    encoded_review = []
+
+    for word in words:
+
+        index = word_index.get(word)
+
+        # Unknown word OR word outside top 1000 vocabulary
+        if index is None or index + 3 >= MAX_FEATURES:
+            encoded_review.append(2)
+
+        else:
+            encoded_review.append(index + 3)
 
     padded_review = sequence.pad_sequences(
         [encoded_review],
-        maxlen=500
+        maxlen=MAX_LEN
     )
 
     return padded_review
